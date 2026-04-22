@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通话数据 - 融鑫汇</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #d4af37;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .stats-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .stats-card h2 {
+            color: #d4af37;
+            margin-bottom: 16px;
+            font-size: 1.2em;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            padding-bottom: 10px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+        .stat-label {
+            color: #aaa;
+        }
+        .stat-value {
+            color: #d4af37;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .month-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .month-item {
+            background: rgba(212,175,55,0.2);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .month-item:hover {
+            background: rgba(212,175,55,0.3);
+            transform: translateY(-2px);
+        }
+        .month-item a {
+            color: #d4af37;
+            text-decoration: none;
+            display: block;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+        .error {
+            background: rgba(255,0,0,0.2);
+            border: 1px solid rgba(255,0,0,0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📞 通话数据</h1>
+        
+        <div id="content">
+            <div class="loading">正在加载数据...</div>
+        </div>
+        
+        <div class="footer">
+            <p>由 CallStats App 自动同步</p>
+            <p>最后更新：<span id="lastUpdate">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.github.com/repos/ztj555/tonghuashuju/contents/data';
+        
+        async function loadData() {
+            try {
+                // 获取最新摘要
+                const summaryRes = await fetch(`${API_BASE}/summary_latest.json`, {
+                    headers: {
+                        'Accept': 'application/vnd.github.v3.raw'
+                    }
+                });
+                
+                if (summaryRes.ok) {
+                    const summary = await summaryRes.json();
+                    renderSummary(summary);
+                } else {
+                    document.getElementById('content').innerHTML = `
+                        <div class="stats-card">
+                            <h2>⚠️ 暂无数据</h2>
+                            <p style="color:#888; margin-top:10px;">请先在 App 中同步一次数据</p>
+                        </div>
+                    `;
+                }
+                
+                // 更新最后同步时间
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
+                
+            } catch (err) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        <p>加载失败，请检查网络</p>
+                        <p style="font-size:0.8em; margin-top:10px;">${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function formatDuration(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            if (hours > 0) {
+                return `${hours}小时${minutes}分钟`;
+            }
+            return `${minutes}分钟`;
+        }
+        
+        function renderSummary(data) {
+            const html = `
+                <div class="stats-card">
+                    <h2>📊 统计数据</h2>
+                    <div class="stat-row">
+                        <span class="stat-label">统计日期</span>
+                        <span class="stat-value">${data.date || '-'}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">总通话次数</span>
+                        <span class="stat-value">${data.totalCalls || 0} 次</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">总通话时长</span>
+                        <span class="stat-value">${formatDuration(data.totalDuration || 0)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">来电次数</span>
+                        <span class="stat-value">${data.incomingCalls || 0} 次</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">来电时长</span>
+                        <span class="stat-value">${formatDuration(data.incomingDuration || 0)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">去电次数</span>
+                        <span class="stat-value">${data.outgoingCalls || 0} 次</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">去电时长</span>
+                        <span class="stat-value">${formatDuration(data.outgoingDuration || 0)}</span>
+                    </div>
+                </div>
+                
+                <div class="stats-card">
+                    <h2>📅 历史月份</h2>
+                    <div class="month-list">
+                        ${generateMonthLinks(data)}
+                    </div>
+                </div>
+            `;
+            document.getElementById('content').innerHTML = html;
+        }
+        
+        function generateMonthLinks(data) {
+            if (!data.availableMonths || data.availableMonths.length === 0) {
+                return '<p style="color:#888;">暂无历史数据</p>';
+            }
+            return data.availableMonths.map(month => `
+                <div class="month-item">
+                    <a href="data/${month}/summary_latest.json" target="_blank">${month}</a>
+                </div>
+            `).join('');
+        }
+        
+        loadData();
+    </script>
+</body>
+</html>
