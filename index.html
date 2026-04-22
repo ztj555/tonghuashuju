@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>通话数据 - 融鑫汇</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -17,205 +13,212 @@
             color: #fff;
             padding: 20px;
         }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        h1 {
-            text-align: center;
-            color: #d4af37;
-            margin-bottom: 30px;
-            font-size: 2em;
-        }
-        .stats-card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            backdrop-filter: blur(10px);
-        }
-        .stats-card h2 {
-            color: #d4af37;
-            margin-bottom: 16px;
-            font-size: 1.2em;
-            border-bottom: 1px solid rgba(212,175,55,0.3);
-            padding-bottom: 10px;
-        }
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .stat-row:last-child {
-            border-bottom: none;
-        }
-        .stat-label {
-            color: #aaa;
-        }
-        .stat-value {
-            color: #d4af37;
-            font-weight: bold;
-            font-size: 1.1em;
-        }
-        .month-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .month-item {
-            background: rgba(212,175,55,0.2);
-            border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 8px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .month-item:hover {
-            background: rgba(212,175,55,0.3);
-            transform: translateY(-2px);
-        }
-        .month-item a {
-            color: #d4af37;
-            text-decoration: none;
-            display: block;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #666;
-            font-size: 0.9em;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #888;
-        }
-        .error {
-            background: rgba(255,0,0,0.2);
-            border: 1px solid rgba(255,0,0,0.3);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            color: #ff6b6b;
-        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: #d4af37; margin-bottom: 30px; font-size: 2em; }
+        .stats-card { background: rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        .stats-card h2 { color: #d4af37; margin-bottom: 16px; font-size: 1.2em; border-bottom: 1px solid rgba(212,175,55,0.3); padding-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #aaa; }
+        .stat-value { color: #d4af37; font-weight: bold; font-size: 1.1em; }
+        .user-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 20px; }
+        .user-card { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.3s; }
+        .user-card:hover { background: rgba(212,175,55,0.25); transform: translateY(-2px); }
+        .user-card h3 { color: #d4af37; margin-bottom: 8px; font-size: 1.1em; }
+        .user-card p { color: #888; font-size: 0.9em; margin-bottom: 4px; }
+        .user-card .stats-summary { color: #fff; font-weight: bold; margin-top: 8px; }
+        .footer { text-align: center; margin-top: 40px; color: #666; font-size: 0.9em; }
+        .loading { text-align: center; padding: 40px; color: #888; }
+        .error { background: rgba(255,0,0,0.2); border: 1px solid rgba(255,0,0,0.3); border-radius: 8px; padding: 20px; text-align: center; color: #ff6b6b; }
+        .tab-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 10px 20px; color: #aaa; cursor: pointer; transition: all 0.3s; }
+        .tab-btn:hover { background: rgba(255,255,255,0.2); }
+        .tab-btn.active { background: rgba(212,175,55,0.3); border-color: #d4af37; color: #d4af37; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📞 通话数据</h1>
         
-        <div id="content">
+        <div class="tab-bar">
+            <button class="tab-btn active" onclick="showAllUsers()">所有用户</button>
+        </div>
+        
+        <div id="userList">
             <div class="loading">正在加载数据...</div>
+        </div>
+        
+        <div id="userDetail" class="hidden">
+            <button class="tab-btn" onclick="showAllUsers()">← 返回用户列表</button>
+            <div id="userStats"></div>
         </div>
         
         <div class="footer">
             <p>由 CallStats App 自动同步</p>
-            <p>最后更新：<span id="lastUpdate">-</span></p>
+            <p>数据更新时间：<span id="lastUpdate">-</span></p>
         </div>
     </div>
 
     <script>
-        const API_BASE = 'https://api.github.com/repos/ztj555/tonghuashuju/contents/data';
+        const API_BASE = 'https://api.github.com/repos/ztj555/tonghuashuju/contents';
+        
+        // 存储所有用户数据
+        let allUsersData = [];
         
         async function loadData() {
             try {
-                // 获取最新摘要
-                const summaryRes = await fetch(`${API_BASE}/summary_latest.json`, {
-                    headers: {
-                        'Accept': 'application/vnd.github.v3.raw'
-                    }
+                // 尝试获取根目录
+                const res = await fetch(`${API_BASE}?ref=main`, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
                 });
                 
-                if (summaryRes.ok) {
-                    const summary = await summaryRes.json();
-                    renderSummary(summary);
-                } else {
-                    document.getElementById('content').innerHTML = `
-                        <div class="stats-card">
-                            <h2>⚠️ 暂无数据</h2>
-                            <p style="color:#888; margin-top:10px;">请先在 App 中同步一次数据</p>
-                        </div>
-                    `;
+                if (!res.ok) {
+                    document.getElementById('userList').innerHTML = '<div class="error"><p>暂无数据</p><p style="font-size:0.9em; margin-top:10px;">请先在 App 中同步一次数据</p></div>';
+                    return;
                 }
                 
-                // 更新最后同步时间
+                const files = await res.json();
+                
+                // 找到用户目录
+                const userDirs = files.filter(f => f.type === 'dir' && f.name !== 'data');
+                
+                if (userDirs.length === 0) {
+                    document.getElementById('userList').innerHTML = '<div class="stats-card"><h2>⚠️ 暂无数据</h2><p style="color:#888;">请先在 App 中同步一次数据</p></div>';
+                    return;
+                }
+                
+                // 加载每个用户的数据
+                allUsersData = [];
+                for (const userDir of userDirs) {
+                    await loadUserData(userDir.name);
+                }
+                
+                renderUserList();
                 document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
                 
             } catch (err) {
-                document.getElementById('content').innerHTML = `
-                    <div class="error">
-                        <p>加载失败，请检查网络</p>
-                        <p style="font-size:0.8em; margin-top:10px;">${err.message}</p>
-                    </div>
-                `;
+                document.getElementById('userList').innerHTML = `<div class="error"><p>加载失败</p><p style="font-size:0.8em; margin-top:10px;">${err.message}</p></div>`;
             }
         }
         
+        async function loadUserData(userName) {
+            try {
+                const monthRes = await fetch(`${API_BASE}/${userName}/data?ref=main`, {
+                    headers: { 'Accept': 'application/vnd.github.v3+json' }
+                });
+                
+                if (!monthRes.ok) return;
+                
+                const months = await monthRes.json();
+                const monthDirs = months.filter(m => m.type === 'dir');
+                
+                // 获取最新月份的数据
+                if (monthDirs.length === 0) return;
+                
+                const latestMonth = monthDirs[monthDirs.length - 1].name;
+                const summaryRes = await fetch(`${API_BASE}/${userName}/data/${latestMonth}/summary_latest.json?ref=main`, {
+                    headers: { 'Accept': 'application/vnd.github.v3.raw' }
+                });
+                
+                if (summaryRes.ok) {
+                    const data = await summaryRes.json();
+                    allUsersData.push({
+                        userName: userName,
+                        data: data,
+                        month: latestMonth
+                    });
+                }
+            } catch (err) {
+                console.error(`加载用户 ${userName} 数据失败:`, err);
+            }
+        }
+        
+        function renderUserList() {
+            if (allUsersData.length === 0) {
+                document.getElementById('userList').innerHTML = '<div class="stats-card"><h2>⚠️ 暂无数据</h2></div>';
+                return;
+            }
+            
+            const html = `
+                <div class="stats-card">
+                    <h2>👥 用户列表 (${allUsersData.length})</h2>
+                    <div class="user-list">
+                        ${allUsersData.map(user => `
+                            <div class="user-card" onclick="showUserDetail('${user.userName}')">
+                                <h3>👤 ${user.userName}</h3>
+                                <p>📅 ${user.data.date || '-'}</p>
+                                <p>📱 ${user.data.deviceId || '-'}</p>
+                                <div class="stats-summary">
+                                    📞 ${user.data.totalCalls || 0} 次
+                                    ⏱️ ${formatDuration(user.data.totalDuration || 0)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('userList').innerHTML = html;
+        }
+        
+        function showUserDetail(userName) {
+            const user = allUsersData.find(u => u.userName === userName);
+            if (!user) return;
+            
+            document.getElementById('userList').classList.add('hidden');
+            document.getElementById('userDetail').classList.remove('hidden');
+            
+            const html = `
+                <div class="stats-card">
+                    <h2>👤 ${user.userName}</h2>
+                    <p style="color:#888; margin-bottom:16px;">📅 ${user.data.date || '-'} | 📱 ${user.data.deviceId || '-'}</p>
+                    
+                    <div class="stat-row">
+                        <span class="stat-label">总通话次数</span>
+                        <span class="stat-value">${user.data.totalCalls || 0} 次</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">总通话时长</span>
+                        <span class="stat-value">${formatDuration(user.data.totalDuration || 0)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">来电次数</span>
+                        <span class="stat-value">${user.data.incomingCalls || 0} 次</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">来电时长</span>
+                        <span class="stat-value">${formatDuration(user.data.incomingDuration || 0)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">去电次数</span>
+                        <span class="stat-value">${user.data.outgoingCalls || 0} 次</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">去电时长</span>
+                        <span class="stat-value">${formatDuration(user.data.outgoingDuration || 0)}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">未接来电</span>
+                        <span class="stat-value">${user.data.missedCalls || 0} 次</span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('userStats').innerHTML = html;
+        }
+        
+        function showAllUsers() {
+            document.getElementById('userList').classList.remove('hidden');
+            document.getElementById('userDetail').classList.add('hidden');
+        }
+        
         function formatDuration(seconds) {
+            if (!seconds) return '0分钟';
             const hours = Math.floor(seconds / 3600);
             const minutes = Math.floor((seconds % 3600) / 60);
             if (hours > 0) {
                 return `${hours}小时${minutes}分钟`;
             }
             return `${minutes}分钟`;
-        }
-        
-        function renderSummary(data) {
-            const html = `
-                <div class="stats-card">
-                    <h2>📊 统计数据</h2>
-                    <div class="stat-row">
-                        <span class="stat-label">统计日期</span>
-                        <span class="stat-value">${data.date || '-'}</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">总通话次数</span>
-                        <span class="stat-value">${data.totalCalls || 0} 次</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">总通话时长</span>
-                        <span class="stat-value">${formatDuration(data.totalDuration || 0)}</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">来电次数</span>
-                        <span class="stat-value">${data.incomingCalls || 0} 次</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">来电时长</span>
-                        <span class="stat-value">${formatDuration(data.incomingDuration || 0)}</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">去电次数</span>
-                        <span class="stat-value">${data.outgoingCalls || 0} 次</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">去电时长</span>
-                        <span class="stat-value">${formatDuration(data.outgoingDuration || 0)}</span>
-                    </div>
-                </div>
-                
-                <div class="stats-card">
-                    <h2>📅 历史月份</h2>
-                    <div class="month-list">
-                        ${generateMonthLinks(data)}
-                    </div>
-                </div>
-            `;
-            document.getElementById('content').innerHTML = html;
-        }
-        
-        function generateMonthLinks(data) {
-            if (!data.availableMonths || data.availableMonths.length === 0) {
-                return '<p style="color:#888;">暂无历史数据</p>';
-            }
-            return data.availableMonths.map(month => `
-                <div class="month-item">
-                    <a href="data/${month}/summary_latest.json" target="_blank">${month}</a>
-                </div>
-            `).join('');
         }
         
         loadData();
